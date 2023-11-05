@@ -1,0 +1,72 @@
+-- Al no tener claves primarias o foráneas el costo de consultas crece
+CREATE TABLE `facturas1` (
+  `DNI` varchar(11) NOT NULL,
+  `MATRICULA` varchar(5) NOT NULL,
+  `FECHA_VENTA` date DEFAULT NULL,
+  `NUMERO` int NOT NULL,
+  `IMPUESTO` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `items_facturas1` (
+  `NUMERO` int NOT NULL,
+  `CODIGO_DEL_PRODUCTO` varchar(10) NOT NULL,
+  `CANTIDAD` int NOT NULL,
+  `PRECIO` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `tabla_de_productos1` (
+  `CODIGO_DEL_PRODUCTO` varchar(10) NOT NULL,
+  `NOMBRE_DEL_PRODUCTO` varchar(50) DEFAULT NULL,
+  `TAMANO` varchar(10) DEFAULT NULL,
+  `SABOR` varchar(20) DEFAULT NULL,
+  `ENVASE` varchar(20) DEFAULT NULL,
+  `PRECIO_DE_LISTA` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO facturas1 
+SELECT * FROM facturas;
+
+
+INSERT INTO items_facturas1
+SELECT * FROM items_facturas;
+
+
+INSERT INTO tabla_de_productos1
+SELECT * FROM tabla_de_productos;
+
+-- costo 3.75
+SELECT A.CODIGO_DEL_PRODUCTO FROM tabla_de_productos1 A;
+
+/*
+costo 746512.92
+*/
+SELECT A.CODIGO_DEL_PRODUCTO, C.CANTIDAD FROM tabla_de_productos1 A 
+INNER JOIN items_facturas1 C  
+ON A.CODIGO_DEL_PRODUCTO = C.CODIGO_DEL_PRODUCTO;
+
+
+/*
+costo 6552 067 197.58
+*/
+SELECT A.CODIGO_DEL_PRODUCTO, YEAR(FECHA_VENTA) AS ANIO, C.CANTIDAD 
+FROM tabla_de_productos1 A 
+INNER JOIN items_facturas1 C  
+ON A.CODIGO_DEL_PRODUCTO = C.CODIGO_DEL_PRODUCTO 
+INNER JOIN facturas1 B 
+ON C.NUMERO = B.NUMERO;
+
+/*
+costo 6552 067 197.58
+*/
+SELECT A.CODIGO_DEL_PRODUCTO, YEAR(FECHA_VENTA) AS ANIO, SUM(C.CANTIDAD) AS CANTIDAD 
+FROM tabla_de_productos1 A 
+INNER JOIN items_facturas1 C  
+ON A.CODIGO_DEL_PRODUCTO = C.CODIGO_DEL_PRODUCTO 
+INNER JOIN facturas1 B 
+ON C.NUMERO = B.NUMERO 
+GROUP BY A.CODIGO_DEL_PRODUCTO, YEAR(FECHA_VENTA) 
+ORDER BY A.CODIGO_DEL_PRODUCTO, YEAR(FECHA_VENTA);
+
+-- Los costos aumentan por los JOINS usados, los GROUP BY u ORDER BY no afectan al costo
+
