@@ -1,4 +1,4 @@
-# Administracion mysql parte2
+# Administración mysql parte2
 * Índices para mejorar el desempeño de consultas
 * Administrar usuarios y privilegios
   
